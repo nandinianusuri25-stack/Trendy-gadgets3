@@ -1,0 +1,7 @@
+{
+  "name": "Trendy Gadgets",
+  "description": "A premium e-commerce platform for unique gifts and trendy tech gadgets featuring AI-powered recommendations and advanced admin controls.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
