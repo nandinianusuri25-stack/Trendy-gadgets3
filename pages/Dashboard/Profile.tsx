@@ -27,10 +27,15 @@ const Profile: React.FC = () => {
 
   const handleSaveProfile = async () => {
     setSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 800));
-    updateUser(editForm);
-    setIsEditing(false);
-    setSaving(false);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 800));
+      updateUser(editForm);
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Profile update failed", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleAddAddress = async (e: React.FormEvent) => {
@@ -38,34 +43,42 @@ const Profile: React.FC = () => {
     if (!user) return;
     
     setSaving(true);
-    await new Promise(resolve => setTimeout(resolve, 600));
+    try {
+      await new Promise(resolve => setTimeout(resolve, 600));
 
-    const newAddress: Address = {
-      ...addressForm,
-      id: `addr-${Date.now()}`,
-      isDefault: user.addresses.length === 0 ? true : addressForm.isDefault
-    };
+      const currentAddresses = user.addresses || [];
+      const newAddress: Address = {
+        ...addressForm,
+        id: `addr-${Date.now()}`,
+        isDefault: currentAddresses.length === 0 ? true : addressForm.isDefault
+      };
 
-    updateUser({
-      addresses: [...user.addresses, newAddress]
-    });
+      updateUser({
+        addresses: [...currentAddresses, newAddress]
+      });
 
-    setIsAddingAddress(false);
-    setAddressForm({
-      type: 'Home',
-      street: '',
-      city: '',
-      state: '',
-      zip: '',
-      isDefault: false
-    });
-    setSaving(false);
+      setIsAddingAddress(false);
+      setAddressForm({
+        type: 'Home',
+        street: '',
+        city: '',
+        state: '',
+        zip: '',
+        isDefault: false
+      });
+    } catch (error) {
+      console.error("Failed to add address", error);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleImageUpdate = () => {
     const newImg = `https://picsum.photos/seed/${Math.random()}/200/200`;
     setEditForm(prev => ({ ...prev, profileImage: newImg }));
   };
+
+  const userAddresses = user?.addresses || [];
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-12">
@@ -241,7 +254,7 @@ const Profile: React.FC = () => {
                     </button>
                   </div>
                 </form>
-              ) : user?.addresses.length === 0 ? (
+              ) : userAddresses.length === 0 ? (
                 <div className="text-center py-6">
                   <p className="text-sm text-slate-400 mb-4">No addresses saved yet.</p>
                   <button 
@@ -253,7 +266,7 @@ const Profile: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {user?.addresses.map(addr => (
+                  {userAddresses.map(addr => (
                     <div key={addr.id} className="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm flex items-start gap-3 relative group">
                       <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
                         <i className={`fa-solid ${addr.type === 'Home' ? 'fa-house-chimney' : 'fa-briefcase'} text-xs`}></i>
